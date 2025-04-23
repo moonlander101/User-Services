@@ -42,7 +42,21 @@ A Django-based authentication system with token-based authentication functionali
    python manage.py migrate
    ```
 
-6. Run the development server
+6. Create initial roles
+   ```bash
+   python manage.py shell
+
+   from accounts.models import Role
+   Role.objects.create(id=1, name='Admin', description='Administrator with full access')
+   Role.objects.create(id=2, name='Regular User', description='Standard user account')
+   Role.objects.create(id=3, name='Supplier', description='Product supplier')
+   Role.objects.create(id=4, name='Vendor', description='Product vendor')
+   Role.objects.create(id=5, name='Warehouse Manager', description='Manages warehouses')
+   Role.objects.create(id=6, name='Driver', description='Delivery personnel')
+   exit()
+   ```
+
+7. Run the development server
    ```bash
    python manage.py runserver
    ```
