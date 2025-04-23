@@ -49,20 +49,26 @@ A Django-based authentication system with token-based authentication functionali
 
 ## API Endpoints
 
-- `/api/v1/auth/register/` - Register a new user
-- `/api/v1/auth/login/` - Login and get an authentication token
-- `/api/v1/auth/logout/` - Logout and invalidate the token
-- `/api/v1/auth/profile/` - Get or update the user profile
-- `/api/v1/auth/password_change/` - Change the user password
-- `/api/v1/auth/password_reset/` - Request a password reset email
-- `/api/v1/auth/password_reset_confirm/<uidb64>/<token>/` - Confirm password reset
+- `/api/v1/register/` - Register a new user
+- `/api/v1/login/` - Login and get an authentication token
+- `/api/v1/logout/` - Logout and invalidate the token
+- `/api/v1/me/` - Get the user profile
+- `/api/v1/me/update/` - Update the user profile
+- `/api/v1/password/change/` - Change the user password
+- `/api/v1/password/reset/` - Request a password reset email
+- `/api/v1/password/reset-confirm/<uidb64>/<token>/` - Confirm password reset
+
+### Admin Endpoints
+- `/api/v1/admin/users/` - Get all users (admin only)
+- `/api/v1/admin/users/<user_id>/` - Update specific user (admin only)
+- `/api/v1/admin/users/<user_id>/delete/` - Delete specific user (admin only)
 
 ## Authentication
 
 All protected endpoints require token authentication. Include the token in the request header:
 
 ```
-Authorization: Token <your_token>
+Authorization: Bearer <your_token>
 ```
 
 ## Testing
