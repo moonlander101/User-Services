@@ -171,6 +171,7 @@ def login_view(request):
                 'username': user.username,
                 'email': user.email,
                 'role_id': getattr(user, 'role_id', 2),
+                'role': getattr(user.role, 'name', 'Regular User'),
             }
         })
     else:
@@ -229,6 +230,7 @@ def get_profile_view(request):
             'first_name': user.first_name,
             'last_name': user.last_name,
             'role_id': role_id,
+            'role': getattr(user.role, 'name', 'Regular User'),
             'is_verified': getattr(user, 'is_verified', False),
             'role_data': role_data
         }
@@ -503,6 +505,7 @@ def admin_get_all_users(request):
             'first_name': user.first_name,
             'last_name': user.last_name,
             'role_id': role_id,
+            'role': getattr(user.role, 'name', 'Regular User'),
             'is_verified': getattr(user, 'is_verified', False),
             'role_data': role_data
         })
