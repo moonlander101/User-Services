@@ -77,8 +77,13 @@ class PasswordResetToken(models.Model):
 class Supplier(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     company_name = models.CharField(max_length=255)
+    code = models.CharField(max_length=10, unique=True, default="SUP-001")  # Added default value
     business_type = models.CharField(max_length=100)
     tax_id = models.CharField(max_length=50)
+    compliance_score = models.FloatField(default=5.0)  # Added compliance score
+    active = models.BooleanField(default=True)  # Added active status
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
     
     def __str__(self):
         return f"Supplier: {self.user.username} ({self.company_name})"
