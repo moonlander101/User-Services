@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils import timezone
+from django.core.validators import MinLengthValidator
 from datetime import timedelta
 
 class Role(models.Model):
@@ -77,6 +78,12 @@ class PasswordResetToken(models.Model):
 class Supplier(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     company_name = models.CharField(max_length=255)
+    # address fields
+    street_no = models.CharField(max_length=20, default=None)
+    street_name = models.CharField(max_length=64, default=None)
+    city = models.CharField(max_length=64, default=None)
+    zipcode = models.CharField(max_length=5, validators=[MinLengthValidator(5)], default=None)
+    
     code = models.CharField(max_length=10, unique=True, default="SUP-001")  # Added default value
     business_type = models.CharField(max_length=100)
     tax_id = models.CharField(max_length=50)
