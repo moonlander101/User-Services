@@ -35,6 +35,20 @@ def generate_jwt_token(user):
         'role_id': getattr(user, 'role_id', 2),
         'exp': datetime.utcnow() + timedelta(days=7)  # 7 days expiration
     }
+
+    if user.role_id == 6:  # Driver
+        try:
+            driver = Driver.objects.get(user=user)
+            payload['vehicle_id'] = driver.vehicle_id
+        except Driver.DoesNotExist:
+            pass
+    
+    elif user.role_id == 5:  # Warehouse Manager
+        try:
+            warehouse_manager = WarehouseManager.objects.get(user=user)
+            payload['warehouse_id'] = warehouse_manager.warehouse_id
+        except WarehouseManager.DoesNotExist:
+            pass
     
     # Generate token
     token = jwt.encode(
@@ -57,6 +71,7 @@ def register_view(request):
     first_name = data.get('first_name', '')
     last_name = data.get('last_name', '')
     role_id = data.get('role_id', 2)  # Default to regular user role
+    phone = data.get('phone', '')
     
     # Extended validation
     if not username or not email or not password:
@@ -99,22 +114,119 @@ def register_view(request):
         email=email,
         password=password,  # create_user handles password hashing
         first_name=first_name,
-        last_name=last_name
+        last_name=last_name,
+        phone=phone
     )
     
     # Set role_id
     user.role_id = role_id
     user.save()
     
-    # Create role-specific profile if needed
-    if role_id == 3:  # Supplier (example role_id)
-        Supplier.objects.create(user_id=user.id)
-    elif role_id == 4:  # Vendor (example role_id)
-        Vendor.objects.create(user_id=user.id)
-    elif role_id == 5:  # Warehouse Manager (example role_id)
-        WarehouseManager.objects.create(user_id=user.id)
-    elif role_id == 6:  # Driver (example role_id)
-        Driver.objects.create(user_id=user.id)
+    # Create role-specific profile with all required fields
+    try:
+        if role_id == 3:  # Supplier
+            # Get supplier-specific fields
+            company_name = data.get('company_name')
+            street_no = data.get('street_no')
+            street_name = data.get('street_name')
+            city = data.get('city')
+            zipcode = data.get('zipcode')
+            code = data.get('code', f"SUP-{user.id:03d}")  # Generate code if not provided
+            business_type = data.get('business_type')
+            tax_id = data.get('tax_id')
+            
+            # Validate required fields
+            if not company_name or not business_type or not tax_id:
+                user.delete()  # Clean up the user if profile creation fails
+                return Response({
+                    'success': False,
+                    'message': 'Missing required fields for Supplier profile'
+                }, status=400)
+            
+            # Create supplier profile
+            Supplier.objects.create(
+                user_id=user.id,
+                company_name=company_name,
+                street_no=street_no,
+                street_name=street_name,
+                city=city,
+                zipcode=zipcode,
+                code=code,
+                business_type=business_type,
+                tax_id=tax_id
+            )
+            
+        elif role_id == 4:  # Vendor
+            # Get vendor-specific fields
+            shop_name = data.get('shop_name')
+            location = data.get('location')
+            business_license = data.get('business_license')
+            
+            # Validate required fields
+            if not shop_name or not location or not business_license:
+                user.delete()
+                return Response({
+                    'success': False,
+                    'message': 'Missing required fields for Vendor profile'
+                }, status=400)
+            
+            # Create vendor profile
+            Vendor.objects.create(
+                user_id=user.id,
+                shop_name=shop_name,
+                location=location,
+                business_license=business_license
+            )
+            
+        elif role_id == 5:  # Warehouse Manager
+            # Get warehouse manager-specific fields
+            warehouse_id = data.get('warehouse_id')
+            department = data.get('department')
+            
+            # Validate required fields
+            if not warehouse_id or not department:
+                user.delete()
+                return Response({
+                    'success': False,
+                    'message': 'Missing required fields for Warehouse Manager profile'
+                }, status=400)
+            
+            # Create warehouse manager profile
+            WarehouseManager.objects.create(
+                user_id=user.id,
+                warehouse_id=warehouse_id,
+                department=department
+            )
+            
+        elif role_id == 6:  # Driver
+            # Get driver-specific fields
+            license_number = data.get('license_number')
+            vehicle_type = data.get('vehicle_type')
+            vehicle_id = data.get('vehicle_id')  # New field we added
+            
+            # Validate required fields
+            if not license_number or not vehicle_type:
+                user.delete()
+                return Response({
+                    'success': False,
+                    'message': 'Missing required fields for Driver profile'
+                }, status=400)
+            
+            # Create driver profile with vehicle_id
+            Driver.objects.create(
+                user_id=user.id,
+                license_number=license_number,
+                vehicle_type=vehicle_type,
+                vehicle_id=vehicle_id  # This is the new field we're adding
+            )
+            
+    except Exception as e:
+        # If profile creation fails, clean up the user to maintain data integrity
+        user.delete()
+        return Response({
+            'success': False,
+            'message': f'Error creating user profile: {str(e)}'
+        }, status=500)
     
     return Response({
         'success': True,
