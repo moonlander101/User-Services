@@ -35,6 +35,20 @@ def generate_jwt_token(user):
         'role_id': getattr(user, 'role_id', 2),
         'exp': datetime.utcnow() + timedelta(days=7)  # 7 days expiration
     }
+
+    if user.role_id == 6:  # Driver
+        try:
+            driver = Driver.objects.get(user=user)
+            payload['vehicle_id'] = driver.vehicle_id
+        except Driver.DoesNotExist:
+            pass
+    
+    elif user.role_id == 5:  # Warehouse Manager
+        try:
+            warehouse_manager = WarehouseManager.objects.get(user=user)
+            payload['warehouse_id'] = warehouse_manager.warehouse_id
+        except WarehouseManager.DoesNotExist:
+            pass
     
     # Generate token
     token = jwt.encode(

@@ -116,6 +116,7 @@ class Driver(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     license_number = models.CharField(max_length=50)
     vehicle_type = models.CharField(max_length=100)
+    vehicle_id = models.CharField(max_length=50, default="UNASSIGNED")
     
     def __str__(self):
         return f"Driver: {self.user.username} ({self.license_number})"
