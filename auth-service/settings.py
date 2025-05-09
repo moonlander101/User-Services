@@ -105,7 +105,7 @@ FRONTEND_URL = 'http://localhost:3000'
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'accounts.authentication.JWTAuthentication',
-        # # 'accounts.authentication.BearerTokenAuthentication',
+        # 'accounts.authentication.BearerTokenAuthentication',
         'rest_framework.authentication.SessionAuthentication',
     ],
     'DEFAULT_PERMISSION_CLASSES': [
