@@ -775,6 +775,7 @@ def register_supplier_view(request):
     password = data.get('password', '')
     first_name = data.get('first_name', '')
     last_name = data.get('last_name', '')
+    phone = data.get('phone', '')
     
     # Supplier-specific fields
     company_name = data.get('company_name', '')
@@ -833,12 +834,16 @@ def register_supplier_view(request):
         email=email,
         password=password,
         first_name=first_name,
-        last_name=last_name
+        last_name=last_name,
+        phone=phone
     )
     
     # Set role_id to Supplier (3)
     user.role_id = 3
     user.save()
+
+    
+    code = data.get('code', f"SUP-{user.id:03d}")
     
     # Create supplier profile
     supplier = Supplier.objects.create(
@@ -848,6 +853,7 @@ def register_supplier_view(request):
         street_name=street_name,
         city=city,
         zipcode=zipcode,
+        code=code,
         business_type=business_type,
         tax_id=tax_id
     )
