@@ -651,3 +651,203 @@ def admin_delete_user(request, user_id):
             'success': False,
             'message': 'User not found'
         }, status=404)
+
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([AllowAny])
+@ensure_csrf_cookie
+def register_supplier_view(request):
+    data = request.data
+    username = data.get('username', '')
+    email = data.get('email', '')
+    password = data.get('password', '')
+    first_name = data.get('first_name', '')
+    last_name = data.get('last_name', '')
+    
+    # Supplier-specific fields
+    company_name = data.get('company_name', '')
+    street_no = data.get('street_no', '')
+    street_name = data.get('street_name', '')
+    city = data.get('city', '')
+    zipcode = data.get('zipcode', '')
+    business_type = data.get('business_type', '')
+    tax_id = data.get('tax_id', '')
+    
+    # Extended validation
+    if not username or not email or not password:
+        return Response({
+            'success': False,
+            'message': 'Please provide username, email and password'
+        }, status=400)
+    
+    # Supplier-specific validation
+    if not company_name:
+        return Response({
+            'success': False,
+            'message': 'Company name is required for suppliers'
+        }, status=400)
+    
+    # Email format validation
+    if not EMAIL_REGEX.match(email):
+        return Response({
+            'success': False,
+            'message': 'Invalid email format'
+        }, status=400)
+    
+    # Password strength validation
+    if not PASSWORD_REGEX.match(password):
+        return Response({
+            'success': False,
+            'message': 'Password must be at least 8 characters and include uppercase, lowercase, and numbers'
+        }, status=400)
+
+    # Check if username already exists
+    if User.objects.filter(username=username).exists():
+        return Response({
+            'success': False,
+            'message': 'Username already exists'
+        }, status=400)
+
+    # Check if email already exists
+    if User.objects.filter(email=email).exists():
+        return Response({
+            'success': False,
+            'message': 'Email already exists'
+        }, status=400)
+    
+    # Create new user 
+    user = User.objects.create_user(
+        username=username,
+        email=email,
+        password=password,
+        first_name=first_name,
+        last_name=last_name
+    )
+    
+    # Set role_id to Supplier (3)
+    user.role_id = 3
+    user.save()
+    
+    # Create supplier profile
+    supplier = Supplier.objects.create(
+        user=user,
+        company_name=company_name,
+        street_no=street_no,
+        street_name=street_name,
+        city=city,
+        zipcode=zipcode,
+        business_type=business_type,
+        tax_id=tax_id
+    )
+    
+    # Generate JWT token
+    token = generate_jwt_token(user)
+    
+    return Response({
+        'success': True,
+        'message': 'Supplier registered successfully',
+        'token': token,
+        'user': {
+            'user_id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'role_id': user.role_id,
+            'role': getattr(user.role, 'name', 'Supplier'),
+        }
+    })
+
+@api_view(['POST'])
+@authentication_classes([])
+@permission_classes([AllowAny])
+@ensure_csrf_cookie
+def register_customer_view(request):
+    data = request.data
+    username = data.get('username', '')
+    email = data.get('email', '')
+    password = data.get('password', '')
+    first_name = data.get('first_name', '')
+    last_name = data.get('last_name', '')
+    
+    # Vendor-specific fields
+    shop_name = data.get('shop_name', '')
+    location = data.get('location', '')
+    business_license = data.get('business_license', '')
+    
+    # Extended validation
+    if not username or not email or not password:
+        return Response({
+            'success': False,
+            'message': 'Please provide username, email and password'
+        }, status=400)
+    
+    # Vendor-specific validation
+    if not shop_name:
+        return Response({
+            'success': False,
+            'message': 'Shop name is required for vendors'
+        }, status=400)
+    
+    # Email format validation
+    if not EMAIL_REGEX.match(email):
+        return Response({
+            'success': False,
+            'message': 'Invalid email format'
+        }, status=400)
+    
+    # Password strength validation
+    if not PASSWORD_REGEX.match(password):
+        return Response({
+            'success': False,
+            'message': 'Password must be at least 8 characters and include uppercase, lowercase, and numbers'
+        }, status=400)
+
+    # Check if username already exists
+    if User.objects.filter(username=username).exists():
+        return Response({
+            'success': False,
+            'message': 'Username already exists'
+        }, status=400)
+
+    # Check if email already exists
+    if User.objects.filter(email=email).exists():
+        return Response({
+            'success': False,
+            'message': 'Email already exists'
+        }, status=400)
+    
+    # Create new user
+    user = User.objects.create_user(
+        username=username,
+        email=email,
+        password=password,
+        first_name=first_name,
+        last_name=last_name
+    )
+    
+    # Set role_id to Vendor (4)
+    user.role_id = 4
+    user.save()
+    
+    # Create vendor profile
+    vendor = Vendor.objects.create(
+        user=user,
+        shop_name=shop_name,
+        location=location,
+        business_license=business_license
+    )
+    
+    # Generate JWT token
+    token = generate_jwt_token(user)
+    
+    return Response({
+        'success': True,
+        'message': 'Vendor registered successfully',
+        'token': token,
+        'user': {
+            'user_id': user.id,
+            'username': user.username,
+            'email': user.email,
+            'role_id': user.role_id,
+            'role': getattr(user.role, 'name', 'Vendor'),
+        }
+    })

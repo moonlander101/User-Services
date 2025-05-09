@@ -103,7 +103,7 @@ project_root/
 │   ├── tests.py              # Authentication tests
 │   ├── urls.py               # URL configurations
 │   └── views.py              # API views
-├── SCMS/                     # Django project settings
+├── auth-service/             # Django project settings
 │   ├── settings.py           # Project settings
 │   ├── urls.py               # Main URL configurations
 │   └── wsgi.py               # WSGI configuration

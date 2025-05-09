@@ -6,6 +6,8 @@ app_name = 'accounts'
 urlpatterns = [
     # Auth endpoints
     path('register/', views.register_view, name='register'),
+    path('register/supplier/', views.register_supplier_view, name='register_supplier'),
+    path('register/vendor/', views.register_customer_view, name='register_customer'),
     path('login/', views.login_view, name='login'),
     path('logout/', views.logout_view, name='logout'),
     
