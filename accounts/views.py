@@ -71,6 +71,7 @@ def register_view(request):
     first_name = data.get('first_name', '')
     last_name = data.get('last_name', '')
     role_id = data.get('role_id', 2)  # Default to regular user role
+    phone = data.get('phone', '')
     
     # Extended validation
     if not username or not email or not password:
@@ -113,7 +114,8 @@ def register_view(request):
         email=email,
         password=password,  # create_user handles password hashing
         first_name=first_name,
-        last_name=last_name
+        last_name=last_name,
+        phone=phone
     )
     
     # Set role_id
