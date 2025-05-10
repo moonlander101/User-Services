@@ -318,18 +318,41 @@ def get_profile_view(request):
             supplier = Supplier.objects.get(user_id=user.id)
             role_data = {
                 'company_name': supplier.company_name,
-                'contact_number': supplier.contact_number,
-                # Add other supplier-specific fields
+                'street_no': supplier.street_no,
+                'street_name': supplier.street_name,
+                'city': supplier.city,
+                'zipcode': supplier.zipcode,
+                'code': supplier.code,
+                'business_type': supplier.business_type,
+                'tax_id': supplier.tax_id,
+                'compliance_score': supplier.compliance_score,
+                'active': supplier.active,
+                'created_at': supplier.created_at,
+                'updated_at': supplier.updated_at
             }
         elif role_id == 4:  # Vendor
             vendor = Vendor.objects.get(user_id=user.id)
             role_data = {
-                'store_name': vendor.store_name,
-                'business_address': vendor.business_address,
-                # Add other vendor-specific fields
+                'shop_name': vendor.shop_name,
+                'location': vendor.location,
+                'business_license': vendor.business_license
             }
-        # Add other role-specific data retrieval
-    except:
+        elif role_id == 5:  # Warehouse Manager
+            warehouse_manager = WarehouseManager.objects.get(user_id=user.id)
+            role_data = {
+                'warehouse_id': warehouse_manager.warehouse_id,
+                'department': warehouse_manager.department
+            }
+        elif role_id == 6:  # Driver
+            driver = Driver.objects.get(user_id=user.id)
+            role_data = {
+                'license_number': driver.license_number,
+                'vehicle_type': driver.vehicle_type,
+                'vehicle_id': driver.vehicle_id
+            }
+    except Exception as e:
+        # Log the error for debugging
+        print(f"Error getting role data: {str(e)}")
         # No role-specific data found
         pass
     
@@ -344,6 +367,7 @@ def get_profile_view(request):
             'role_id': role_id,
             'role': getattr(user.role, 'name', 'Regular User'),
             'is_verified': getattr(user, 'is_verified', False),
+            'phone': user.phone,  # Added phone field
             'role_data': role_data
         }
     })
