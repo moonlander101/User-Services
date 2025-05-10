@@ -46,18 +46,12 @@ This will start:
 
 ### 3. Initialize Roles (optional)
 
-You can exec into the container and run the role setup:
+To initialize roles, use the `init_roles` management command. This command automates the creation of default roles.
+
+Run the following command:
 
 ```bash
-docker exec -it user_service python manage.py shell
-```
-
-```python
-from accounts.models import Role
-Role.objects.create(id=1, name='Admin', description='Administrator with full access')
-Role.objects.create(id=2, name='Regular User', description='Standard user account')
-Role.objects.create(id=3, name='Supplier', description='Product supplier')
-Role.objects.create(id=4, name='Vendor', description='Product vendor')
+docker exec -it user_service python manage.py init_roles
 Role.objects.create(id=5, name='Warehouse Manager', description='Manages warehouses')
 Role.objects.create(id=6, name='Driver', description='Delivery personnel')
 exit()
