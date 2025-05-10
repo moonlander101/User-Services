@@ -22,4 +22,7 @@ urlpatterns = [
     path('admin/users/', views.admin_get_all_users, name='admin_get_all_users'),
     path('admin/users/<int:user_id>/', views.admin_update_user, name='admin_update_user'),
     path('admin/users/<int:user_id>/delete/', views.admin_delete_user, name='admin_delete_user'),
+
+    # Driver endpoints
+    path('drivers/', views.get_all_drivers_view, name='get_all_drivers'),
 ]

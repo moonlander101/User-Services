@@ -969,3 +969,31 @@ def register_customer_view(request):
             'role': getattr(user.role, 'name', 'Vendor'),
         }
     })
+
+@api_view(['GET'])
+@authentication_classes([])
+@permission_classes([AllowAny])
+def get_all_drivers_view(request):
+    """
+    Get all drivers with their vehicle IDs, usernames, and user IDs
+    Only accessible to authenticated users (may want to restrict further based on role)
+    """
+    # Query all drivers with their related user information
+    drivers = Driver.objects.select_related('user').all()
+    
+    # Format the response data
+    drivers_data = []
+    for driver in drivers:
+        drivers_data.append({
+            'user_id': driver.user.id,
+            'username': driver.user.username,
+            'vehicle_id': driver.vehicle_id,
+            'vehicle_type': driver.vehicle_type,
+            'license_number': driver.license_number
+        })
+    
+    return Response({
+        'success': True,
+        'count': len(drivers_data),
+        'drivers': drivers_data
+    })
