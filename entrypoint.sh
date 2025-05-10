@@ -5,6 +5,9 @@ set -e
 echo "Running migrations..."
 python manage.py migrate --noinput
 
+echo "Initializing default roles..."
+python manage.py init_roles
+
 echo "Collecting static files..."
 python manage.py collectstatic --noinput --clear
 

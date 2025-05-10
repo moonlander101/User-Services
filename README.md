@@ -14,7 +14,62 @@ A Django-based authentication system with token-based authentication functionali
 - Password reset via email
 - Token-based authentication
 
-## Setup and Installation
+--- 
+
+## 🚀 Running with Docker
+
+### 1. Create `.env` File
+
+Copy the example environment file:
+
+```bash
+cp example.env .env
+```
+
+Make sure the values are correctly set, especially:
+
+* `DJANGO_SECRET_KEY`
+* `POSTGRES_*` variables
+* Email SMTP credentials (if applicable)
+
+### 2. Build and Start Services
+
+```bash
+docker compose up --build
+```
+
+This will start:
+
+* PostgreSQL database on port `15432`
+* Django user service on port `8001`
+* Adminer (DB UI) on port `8080`
+
+### 3. Initialize Roles (optional)
+
+To initialize roles, use the `init_roles` management command. This command automates the creation of default roles.
+
+Run the following command:
+
+```bash
+docker exec -it user_service python manage.py init_roles
+Role.objects.create(id=5, name='Warehouse Manager', description='Manages warehouses')
+Role.objects.create(id=6, name='Driver', description='Delivery personnel')
+exit()
+```
+
+### 4. Access Services
+
+* **User API**: [http://localhost:8001/api/v1/](http://localhost:8001/api/v1/)
+* **Adminer UI**: [http://localhost:8080](http://localhost:8080)
+
+  * Server: `db`
+  * User: `postgres`
+  * Password: `postgres`
+  * DB: `postgres`
+
+---
+
+## Setup and Installation - Local Development
 
 1. Clone the repository
    ```bash
