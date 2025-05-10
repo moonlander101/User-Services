@@ -1,26 +1,6 @@
-services:
-#  web:
-#    image: python:3.10
-#    container_name: django_app
-#    command: >
-#      bash -c "pip install --no-cache-dir -r requirements.txt &&
-#               python manage.py migrate &&
-#               python manage.py collectstatic --noinput &&
-#               python manage.py runserver 0.0.0.0:8000"
-#    volumes:
-#      - .:/app
-#    working_dir: /app
-#    ports:
-#      - "8000:8000"
-#    environment:
-#      - DEBUG=1
-#      - DJANGO_ALLOWED_HOSTS=localhost
-#      - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres
-#    env_file:
-#      - .env
-#    depends_on:
-#      - db
+version: "3.9"
 
+services:
   db:
     image: postgres:17
     container_name: postgres_db
@@ -30,9 +10,30 @@ services:
       POSTGRES_DB: postgres
     ports:
       - "15432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  user_service:
+    build:
+      context: .              # Adjust if Dockerfile is inside ./user_service
+      dockerfile: Dockerfile  # Explicit if needed
+    container_name: user_service
+    env_file:
+      - .env
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
 
   adminer:
     image: adminer
     container_name: adminer
     ports:
       - "8080:8080"
+    depends_on:
+      - db
+
+volumes:
+  pgdata:

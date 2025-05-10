@@ -1,38 +1,41 @@
-FROM python:3.10-slim
+# Use official Python slim image
+FROM python:3.12-slim
 
-# Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1
-ENV PYTHONUNBUFFERED=1
-ENV DJANGO_SETTINGS_MODULE=auth-service.settings
+LABEL maintainer="iran"
 
-# Set work directory
+# Environment config
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    DJANGO_PORT=8000
+
+# Set working directory
 WORKDIR /app
 
-# Install system dependencies required for psycopg2
+# Install system dependencies for Python + PostgreSQL + C extensions (needed for cryptography, psycopg2, etc.)
 RUN apt-get update && apt-get install -y \
-    gcc \
-    python3-dev \
+    build-essential \
     libpq-dev \
+    gcc \
+    curl \
+    libffi-dev \
+    libssl-dev \
+    && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Install dependencies
-COPY requirements.txt /app/
-RUN pip install --no-cache-dir -r requirements.txt
+# Install Python dependencies
+COPY requirements.txt .
+RUN pip install --no-cache-dir --upgrade pip \
+    && pip install --no-cache-dir -r requirements.txt
 
-RUN pip install gunicorn
+# Copy project files
+COPY . .
 
-# Copy project
-COPY . /app/
+# Copy entrypoint script
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
-# Run database migrations and collect static files at build time
-RUN python manage.py collectstatic --noinput
+# Expose Django port (can be overridden)
+EXPOSE ${DJANGO_PORT}
 
-# Run as non-root user for better security
-RUN useradd -m appuser
-USER appuser
-
-# Expose the application port
-EXPOSE 8000
-
-# Use gunicorn as the production server
-CMD ["gunicorn", "--bind", "0.0.0.0:8000", "auth-service.wsgi:application"]
+# Entrypoint will run migrations and then start the server
+ENTRYPOINT ["/entrypoint.sh"]
