@@ -909,6 +909,7 @@ def register_customer_view(request):
     password = data.get('password', '')
     first_name = data.get('first_name', '')
     last_name = data.get('last_name', '')
+    phone = data.get('phone', '')
     
     # Vendor-specific fields
     shop_name = data.get('shop_name', '')
@@ -963,7 +964,8 @@ def register_customer_view(request):
         email=email,
         password=password,
         first_name=first_name,
-        last_name=last_name
+        last_name=last_name,
+        phone=phone
     )
     
     # Set role_id to Vendor (4)
