@@ -1,39 +1,48 @@
-version: "3.9"
-
 services:
   db:
     image: postgres:17
-    container_name: postgres_db
+    container_name: user-db
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: postgres
     ports:
-      - "15432:5432"
+      - "35432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+    networks:
+      - scms
 
-  user_service:
+  user-service:
     build:
       context: .              # Adjust if Dockerfile is inside ./user_service
       dockerfile: Dockerfile  # Explicit if needed
-    container_name: user_service
+    container_name: user-service
     env_file:
       - .env
     volumes:
       - .:/app
     ports:
-      - "8001:8000"
+      - "8003:8000"
     depends_on:
       - db
+    networks:
+      - scms
 
   adminer:
     image: adminer
     container_name: adminer
     ports:
-      - "8080:8080"
+      - "8383:8080"
     depends_on:
       - db
+    networks:
+      - scms
 
 volumes:
   pgdata:
+
+networks:
+  scms:
+    name: scms-network
+    external: true
