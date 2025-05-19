@@ -4,6 +4,7 @@ import jwt
 from django.contrib.auth import authenticate, login, logout
 from django.http import JsonResponse
 from django.views.decorators.csrf import ensure_csrf_cookie, csrf_exempt
+from django.shortcuts import get_object_or_404
 import json
 import uuid
 from django.utils import timezone
@@ -12,6 +13,7 @@ import secrets
 from django.core.mail import send_mail
 from django.conf import settings
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
+from django.utils.encoding import force_str, force_bytes
 
 from rest_framework.decorators import api_view, permission_classes, authentication_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -1023,3 +1025,137 @@ def get_all_drivers_view(request):
         'count': len(drivers_data),
         'drivers': drivers_data
     })
+
+@api_view(['PUT'])
+@authentication_classes([])
+@permission_classes([AllowAny])
+def update_driver_vehicle_view(request):
+    """
+    Update a driver's vehicle information (vehicle_type and vehicle_id)
+    """
+    data = request.data
+    user_id = data.get('user_id')
+    vehicle_type = data.get('vehicle_type')
+    vehicle_id = data.get('vehicle_id')
+    
+    # Validate required fields
+    if not user_id:
+        return Response({
+            'success': False,
+            'message': 'Driver user_id is required'
+        }, status=400)
+    
+    if not vehicle_type and not vehicle_id:
+        return Response({
+            'success': False,
+            'message': 'At least one of vehicle_type or vehicle_id must be provided'
+        }, status=400)
+    
+    try:
+        # Check if the user exists and is a driver (role_id = 6)
+        user = User.objects.get(id=user_id)
+        if user.role_id != 6:
+            return Response({
+                'success': False,
+                'message': 'User is not a driver'
+            }, status=400)
+        
+        # Get the driver profile
+        driver = get_object_or_404(Driver, user_id=user_id)
+        
+        # Update fields if provided
+        if vehicle_type:
+            driver.vehicle_type = vehicle_type
+            
+        if vehicle_id:
+            driver.vehicle_id = vehicle_id
+            
+        # Save the changes
+        driver.save()
+        
+        # Update JWT token to reflect new vehicle_id if needed
+        if vehicle_id:
+            token = generate_jwt_token(user)
+        else:
+            token = None
+        
+        # Return success response
+        return Response({
+            'success': True,
+            'message': 'Driver vehicle information updated successfully',
+            'data': {
+                'user_id': user_id,
+                'vehicle_type': driver.vehicle_type,
+                'vehicle_id': driver.vehicle_id
+            },
+            'token': token
+        })
+        
+    except User.DoesNotExist:
+        return Response({
+            'success': False,
+            'message': 'User not found'
+        }, status=404)
+    except Driver.DoesNotExist:
+        return Response({
+            'success': False,
+            'message': 'Driver profile not found'
+        }, status=404)
+    except Exception as e:
+        return Response({
+            'success': False,
+            'message': f'Error updating driver vehicle information: {str(e)}'
+        }, status=500)
+    
+@api_view(['GET'])
+@authentication_classes([])
+@permission_classes([AllowAny])
+def get_driver_by_vehicle_view(request):
+    """
+    Fetch driver information based on vehicle_id
+    """
+    vehicle_id = request.query_params.get('vehicle_id')
+    
+    if not vehicle_id:
+        return Response({
+            'success': False,
+            'message': 'vehicle_id parameter is required'
+        }, status=400)
+    
+    try:
+        # Find the driver with the given vehicle_id
+        driver = Driver.objects.get(vehicle_id=vehicle_id)
+        
+        # Get the associated user
+        user = User.objects.get(id=driver.user_id)
+        
+        # Return the driver information
+        return Response({
+            'success': True,
+            'message': 'Driver found',
+            'data': {
+                'user_id': user.id,
+                'username': user.username,
+                'vehicle_id': driver.vehicle_id,
+                'vehicle_type': driver.vehicle_type,
+                'license_number': driver.license_number
+            }
+        })
+    
+    except Driver.DoesNotExist:
+        return Response({
+            'success': False,
+            'message': 'No driver found with this vehicle_id'
+        }, status=404)
+    
+    except User.DoesNotExist:
+        return Response({
+            'success': False,
+            'message': 'User associated with this driver not found'
+        }, status=404)
+    
+    except Exception as e:
+        return Response({
+            'success': False,
+            'message': f'Error fetching driver information: {str(e)}'
+        }, status=500)

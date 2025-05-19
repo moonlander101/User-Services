@@ -25,4 +25,6 @@ urlpatterns = [
 
     # Driver endpoints
     path('drivers/', views.get_all_drivers_view, name='get_all_drivers'),
+    path('drivers/vehicle/update/', views.update_driver_vehicle_view, name='update_driver_vehicle'),
+    path('drivers/vehicle/', views.get_driver_by_vehicle_view, name='get_driver_by_vehicle'),
 ]
